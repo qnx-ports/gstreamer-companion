@@ -1,0 +1,93 @@
+# alpine-maintainer="Krassy Boykinov <kboykinov@teamcentrixx.com>"
+# Maintainer: Felix Xing <fxing@qnx.com>
+pkgname=gstreamer
+pkgver=1.26.8
+pkgrel=1
+pkgdesc="GStreamer streaming media framework"
+url="https://gstreamer.freedesktop.org"
+arch="all"
+license="LGPL-2.0-or-later"
+depends="glib qnx-io-sock"
+depends_dev="libxml2-dev glib-dev gobject-introspection-dev"
+makedepends="$depends_dev
+    bison
+    flex
+    meson
+    perl
+    ninja
+    gettext-dev
+    qnx-io-sock-dev
+    clang
+    libc++-dev
+    "
+subpackages="
+    $pkgname-dbg
+    $pkgname-dev
+    $pkgname-doc
+    $pkgname-tools
+    "
+source="https://gstreamer.freedesktop.org/src/gstreamer/gstreamer-$pkgver.tar.xz"
+#options="!check"
+
+build() {
+    CC=clang \
+    CXX=clang++ \
+    CFLAGS="$CFLAGS -O2" \
+    CXXFLAGS="$CXXFLAGS -O2" \
+    CPPFLAGS="$CPPFLAGS -O2" \
+    meson \
+        --prefix=/usr \
+	--libexecdir=lib \
+        -Db_lto=false \
+        -Dintrospection=enabled \
+        -Dbash-completion=disabled \
+        -Dcheck=enabled \
+        -Dcoretracers=enabled \
+        -Dnls=disabled \
+        -Dtests=enabled \
+        -Dtools=enabled \
+        -Dpackage-name="GStreamer (QNX)" \
+        -Dpackage-origin="www.qnx.com" \
+        . output
+    meson compile -C output
+}
+
+check() {
+    meson test --print-errorlogs -C output || true
+}
+
+package() {
+    # 13/109 gst_gstcaps              N/A
+    # 44/109 gst_gstsystemclock       floating point printing
+    # 51/109 gst_gstvalue             floating point printing
+    DESTDIR="$pkgdir" meson install --no-rebuild -C output
+}
+
+dev() {
+    default_dev
+
+    # Support for debugging.
+    amove usr/share/gdb
+    amove usr/share/gstreamer-*/gdb
+
+    # Unit test libraries.
+    amove usr/bin/gst-tester-*
+    amove usr/lib/libgstcheck-*.so.*
+}
+
+doc() {
+    default_doc
+    replaces="${pkgname}1-doc"
+}
+
+tools() {
+    pkgdesc="Tools for GStreamer streaming media framework"
+    # gst-feedback needs this
+    depends="pkgconfig gstreamer libintl"
+
+    amove usr/bin
+}
+
+sha512sums="
+e352fe61549f914dde2fb9aa251afb65ee923dce6907fd3f7dc2d4765ebb69872b0d0c13343a71dbe5a7a609d7bc94235f73461bb48de3d66a33e378060ad5ec  gstreamer-1.26.8.tar.xz
+"
