@@ -2,7 +2,7 @@
 # Maintainer: Felix Xing <fxing@qnx.com>
 pkgname=gstreamer
 pkgver=1.26.8
-pkgrel=${pkgrel:-0}
+pkgrel=1
 pkgdesc="GStreamer streaming media framework"
 url="https://gstreamer.freedesktop.org"
 arch="all"
@@ -88,7 +88,6 @@ tools() {
     amove usr/bin
 }
 
-options="$options ${DISABLE_CHECK:+!check}"
 sha512sums="
 e352fe61549f914dde2fb9aa251afb65ee923dce6907fd3f7dc2d4765ebb69872b0d0c13343a71dbe5a7a609d7bc94235f73461bb48de3d66a33e378060ad5ec  gstreamer-1.26.8.tar.xz
 "
